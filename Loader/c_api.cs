@@ -261,25 +261,6 @@ namespace c_auth
                 return "";
             }
         }
-        public static string ssl_cert()
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(api_link);
-            request.Headers["User-Agent"] = user_agent;
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            response.Close();
-
-            //retrieve the ssl cert and assign it to an X509Certificate object
-            X509Certificate cert = request.ServicePoint.Certificate;
-
-            //convert the X509Certificate to an X509Certificate2 object by passing it into the constructor
-            X509Certificate2 cert2 = new X509Certificate2(cert);
-
-            string cn = cert2.GetIssuerName();
-            string cedate = cert2.GetExpirationDateString();
-            string cpub = cert2.GetPublicKeyString();
-
-            return cpub;
-        }
     }
     class c_userdata
     {
