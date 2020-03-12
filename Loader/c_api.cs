@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.IO;
+using System.Net;
 
 namespace c_auth
 {
@@ -18,41 +18,55 @@ namespace c_auth
 
         public static string enc_key { get; set; }
 
-        private static string api_link = "http://firefra.me/auth/api/"; //maybe you'll make your own auth based on mine
+        private static string api_link = "https://firefra.me/auth/api/"; //maybe you'll make your own auth based on mine
 
         private static string user_agent = "Mozilla FireFrame"; //my ddos protection needs Mozilla in front
+
+        private static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(_));
 
         public static void c_init(string c_version)
         {
             try
             {
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = user_agent;
-                web.Proxy = null;
-
-                string result = web.DownloadString(api_link + "init.php?version=" + c_version + "&program_key=" + program_key);
-
                 if (c_encryption.ssl_cert(api_link, user_agent) != "oek2twC+UlJnvPdW/1eZPmTnKZUvDd4VsYcyGVOo5E0=")
                     Environment.Exit(0);
 
-                if (result == "program_doesnt_exist")
+                using (var web = new WebClient())
                 {
-                    MessageBox.Show("the program doesnt exist");
-                    Environment.Exit(0);
-                }
-                else if (result == c_encryption.encrypt("wrong_version"))
-                {
-                    MessageBox.Show("wrong program version");
-                    Environment.Exit(0);
-                }
-                else if (result == c_encryption.encrypt("started_program"))
-                {
-                    //guess 
-                }
-                else
-                {
-                    MessageBox.Show("invalid encryption key");
-                    Environment.Exit(0);
+                    web.Headers["User-Agent"] = user_agent;
+                    web.Proxy = null;
+
+                    var values = new NameValueCollection();
+                    values["version"] = c_encryption.encrypt(c_version);
+                    values["api_version"] = c_encryption.encrypt("1.5b");
+                    values["program_key"] = base64_encode(program_key);
+
+                    string result = Encoding.UTF8.GetString(web.UploadValues(api_link + "init.php", values));
+
+                    if (result == "program_doesnt_exist")
+                    {
+                        MessageBox.Show("the program doesnt exist");
+                        Environment.Exit(0);
+                    }
+                    else if (result == c_encryption.encrypt("wrong_version"))
+                    {
+                        MessageBox.Show("wrong program version");
+                        Environment.Exit(0);
+                    }
+                    else if(result == c_encryption.encrypt("old_api_version"))
+                    {
+                        MessageBox.Show("please download the newest api version on the auth's website ");
+                        Environment.Exit(0);
+                    }
+                    else if (result == c_encryption.encrypt("started_program"))
+                    {
+                        //guess 
+                    }
+                    else
+                    {
+                        MessageBox.Show("invalid encryption key");
+                        Environment.Exit(0);
+                    }
                 }
             }
             catch (Exception ex)
@@ -67,47 +81,59 @@ namespace c_auth
 
             try
             {
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = user_agent;
-                web.Proxy = null;
-
-                string result = c_encryption.decrypt(web.DownloadString(api_link + "login.php?program_key=" + program_key + "&username=" + c_username + "&password=" + c_password + "&hwid=" + c_hwid));
-
-                if (result == "invalid_username")
+                using (var web = new WebClient())
                 {
-                    MessageBox.Show("invalid username");
-                    return false;
-                }
-                else if (result == "invalid_password")
-                {
-                    MessageBox.Show("invalid password");
-                    return false;
-                }
-                else if (result == "no_sub")
-                {
-                    MessageBox.Show("no sub");
-                    return false;
-                }
-                else if (result == "invalid_hwid")
-                {
-                    MessageBox.Show("invalid hwid");
-                    return false;
-                }
-                else if (result.Contains("logged_in"))
-                {
-                    string[] s = result.Split('|');
+                    web.Headers["User-Agent"] = user_agent;
+                    web.Proxy = null;
 
-                    c_userdata.username = s[1];
-                    c_userdata.email = s[2];
-                    c_userdata.expires = c_encryption.unix_to_date(Convert.ToDouble(s[3]));
-                    c_userdata.rank = Convert.ToInt32(s[4]);
+                    var values = new NameValueCollection();
+                    values["username"] = c_encryption.encrypt(c_username);
+                    values["password"] = c_encryption.encrypt(c_password);
+                    values["hwid"] = c_encryption.encrypt(c_hwid);
+                    values["program_key"] = base64_encode(program_key);
 
-                    shit_pass = c_encryption.encrypt(c_password);
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "login.php", values)));
 
-                    MessageBox.Show("logged in!");
-                    return true;
+                    if (result == "invalid_username")
+                    {
+                        MessageBox.Show("invalid username");
+                        return false;
+                    }
+                    else if (result == "invalid_password")
+                    {
+                        MessageBox.Show("invalid password");
+                        return false;
+                    }
+                    else if (result == "no_sub")
+                    {
+                        MessageBox.Show("no sub");
+                        return false;
+                    }
+                    else if (result == "invalid_hwid")
+                    {
+                        MessageBox.Show("invalid hwid");
+                        return false;
+                    }
+                    else if (result.Contains("logged_in"))
+                    {
+                        string[] s = result.Split('|');
+
+                        c_userdata.username = s[1];
+                        c_userdata.email = s[2];
+                        c_userdata.expires = c_encryption.unix_to_date(Convert.ToDouble(s[3]));
+                        c_userdata.rank = Convert.ToInt32(s[4]);
+
+                        shit_pass = c_encryption.encrypt(c_password);
+
+                        MessageBox.Show("logged in!");
+                        return true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("invalid encryption key");
+                        return false;
+                    }
                 }
-
             }
             catch (Exception ex)
             {
@@ -115,7 +141,6 @@ namespace c_auth
                 Environment.Exit(0);
                 return false;
             }
-            return true;
         }
         public static bool c_register(string c_username, string c_email, string c_password, string c_token, string c_hwid = "default")
         {
@@ -123,50 +148,60 @@ namespace c_auth
 
             try
             {
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = user_agent;
-                web.Proxy = null;
+                using (var web = new WebClient())
+                {
+                    web.Headers["User-Agent"] = user_agent;
+                    web.Proxy = null;
 
-                string result = c_encryption.decrypt(web.DownloadString(api_link + "register.php?program_key=" + program_key + "&username=" + c_username + "&email=" + c_email + "&password=" + c_password + "&token=" + c_token + "&hwid=" + c_hwid));
+                    var values = new NameValueCollection();
+                    values["username"] = c_encryption.encrypt(c_username);
+                    values["email"] = c_encryption.encrypt(c_email);
+                    values["password"] = c_encryption.encrypt(c_password);
+                    values["token"] = c_encryption.encrypt(c_token);
+                    values["hwid"] = c_encryption.encrypt(c_hwid);
+                    values["program_key"] = base64_encode(program_key);
 
-                if (result == "user_already_exists")
-                {
-                    MessageBox.Show("user already exists");
-                    return false;
-                }
-                else if (result == "email_already_exists")
-                {
-                    MessageBox.Show("email already exists");
-                    return false;
-                }
-                else if (result == "invalid_email_format")
-                {
-                    MessageBox.Show("invalid email format");
-                    return false;
-                }
-                else if (result == "invalid_token")
-                {
-                    MessageBox.Show("invalid token");
-                    return false;
-                }
-                else if (result == "maximum_users_reached")
-                {
-                    MessageBox.Show("maximum users reached");
-                    return false;
-                }
-                else if (result == "used_token")
-                {
-                    MessageBox.Show("used token");
-                    return false;
-                }
-                else if (result == "success")
-                {
-                    return true;
-                }
-                else
-                {
-                    MessageBox.Show("invalid encryption key");
-                    return false;
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "register.php", values)));
+
+                    if (result == "user_already_exists")
+                    {
+                        MessageBox.Show("user already exists");
+                        return false;
+                    }
+                    else if (result == "email_already_exists")
+                    {
+                        MessageBox.Show("email already exists");
+                        return false;
+                    }
+                    else if (result == "invalid_email_format")
+                    {
+                        MessageBox.Show("invalid email format");
+                        return false;
+                    }
+                    else if (result == "invalid_token")
+                    {
+                        MessageBox.Show("invalid token");
+                        return false;
+                    }
+                    else if (result == "maximum_users_reached")
+                    {
+                        MessageBox.Show("maximum users reached");
+                        return false;
+                    }
+                    else if (result == "used_token")
+                    {
+                        MessageBox.Show("used token");
+                        return false;
+                    }
+                    else if (result == "success")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("invalid encryption key");
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
@@ -180,40 +215,48 @@ namespace c_auth
         {
             try
             {
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = user_agent;
-                web.Proxy = null;
+                using (var web = new WebClient())
+                {
+                    web.Headers["User-Agent"] = user_agent;
+                    web.Proxy = null;
 
-                string result = c_encryption.decrypt(web.DownloadString(api_link + "activate.php?program_key=" + program_key + "&username=" + c_username + "&password=" + c_password + "&token=" + c_token));
+                    var values = new NameValueCollection();
+                    values["username"] = c_encryption.encrypt(c_username);
+                    values["password"] = c_encryption.encrypt(c_password);
+                    values["token"] = c_encryption.encrypt(c_token);
+                    values["program_key"] = base64_encode(program_key);
 
-                if (result == "invalid_username")
-                {
-                    MessageBox.Show("invalid username");
-                    return false;
-                }
-                else if (result == "invalid_password")
-                {
-                    MessageBox.Show("invalid password");
-                    return false;
-                }
-                else if (result == "invalid_token")
-                {
-                    MessageBox.Show("invalid token");
-                    return false;
-                }
-                else if (result == "used_token")
-                {
-                    MessageBox.Show("used token");
-                    return false;
-                }
-                else if (result == "success")
-                {
-                    return true;
-                }
-                else
-                {
-                    MessageBox.Show("invalid encryption key");
-                    return false;
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "activate.php", values)));
+
+                    if (result == "invalid_username")
+                    {
+                        MessageBox.Show("invalid username");
+                        return false;
+                    }
+                    else if (result == "invalid_password")
+                    {
+                        MessageBox.Show("invalid password");
+                        return false;
+                    }
+                    else if (result == "invalid_token")
+                    {
+                        MessageBox.Show("invalid token");
+                        return false;
+                    }
+                    else if (result == "used_token")
+                    {
+                        MessageBox.Show("used token");
+                        return false;
+                    }
+                    else if (result == "success")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("invalid encryption key");
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
@@ -246,13 +289,22 @@ namespace c_auth
 
             try
             {
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = user_agent;
-                web.Proxy = null;
+                using (var web = new WebClient())
+                {
+                    web.Headers["User-Agent"] = user_agent;
+                    web.Proxy = null;
 
-                string result = c_encryption.decrypt(web.DownloadString(api_link + "var.php?program_key=" + program_key + "&var_name=" + c_var_name + "&username=" + c_userdata.username + "&password=" + c_encryption.decrypt(shit_pass) + "&hwid=" + c_hwid));
+                    var values = new NameValueCollection();
+                    values["var_name"] = c_encryption.encrypt(c_var_name);
+                    values["username"] = c_encryption.encrypt(c_userdata.username);
+                    values["password"] = shit_pass;
+                    values["hwid"] = c_encryption.encrypt(c_hwid);
+                    values["program_key"] = base64_encode(program_key);
 
-                return result;
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "var.php", values)));
+
+                    return result;
+                }
             }
             catch (Exception ex)
             {
