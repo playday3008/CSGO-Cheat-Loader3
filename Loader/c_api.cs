@@ -9,22 +9,22 @@ using System.Security.Principal;
 using System.Text;
 using System.IO;
 using System.Net;
+using System.Linq;
 
 namespace c_auth
 {
     class c_api
     {
-        public static string program_key { get; set; }
-
-        public static string enc_key { get; set; }
+        private static string program_key { get; set; }
+        private static string enc_key { get; set; }
+        private static string iv_key { get; set; }
 
         private static string api_link = "https://firefra.me/auth/api/"; //maybe you'll make your own auth based on mine
 
         private static string user_agent = "Mozilla FireFrame"; //my ddos protection needs Mozilla in front
 
-        private static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(_));
-
-        public static void c_init(string c_version)
+        private static string iv_input { get; set; }
+        public static void c_init(string c_version, string c_program_key, string c_encryption_key)
         {
             try
             {
@@ -36,10 +36,15 @@ namespace c_auth
                     web.Headers["User-Agent"] = user_agent;
                     web.Proxy = null;
 
+                    program_key = c_program_key;
+                    iv_key = c_encryption.iv_key();
+                    enc_key = c_encryption_key;
+
                     var values = new NameValueCollection();
-                    values["version"] = c_encryption.encrypt(c_version);
-                    values["api_version"] = c_encryption.encrypt("1.5b");
-                    values["program_key"] = base64_encode(program_key);
+                    values["version"] = c_encryption.encrypt(c_version, enc_key);
+                    values["session_iv"] = c_encryption.encrypt(iv_key, enc_key);
+                    values["api_version"] = c_encryption.encrypt("2.0b", enc_key);
+                    values["program_key"] = c_encryption.base64_encode(program_key);
 
                     string result = Encoding.UTF8.GetString(web.UploadValues(api_link + "init.php", values));
 
@@ -48,23 +53,24 @@ namespace c_auth
                         MessageBox.Show("the program doesnt exist");
                         Environment.Exit(0);
                     }
-                    else if (result == c_encryption.encrypt("wrong_version"))
+                    else if (result == c_encryption.encrypt("wrong_version", enc_key))
                     {
                         MessageBox.Show("wrong program version");
                         Environment.Exit(0);
                     }
-                    else if(result == c_encryption.encrypt("old_api_version"))
+                    else if(result == c_encryption.encrypt("old_api_version", enc_key))
                     {
                         MessageBox.Show("please download the newest api version on the auth's website ");
                         Environment.Exit(0);
                     }
-                    else if (result == c_encryption.encrypt("started_program"))
+                    else if (c_encryption.decrypt(result, enc_key).Contains("started_program"))
                     {
-                        //guess 
+                        string[] s = c_encryption.decrypt(result, enc_key).Split('|');
+                        iv_input = s[1];
                     }
                     else
                     {
-                        MessageBox.Show("invalid encryption key");
+                        MessageBox.Show("invalid encryption key/iv or session expired");
                         Environment.Exit(0);
                     }
                 }
@@ -87,12 +93,13 @@ namespace c_auth
                     web.Proxy = null;
 
                     var values = new NameValueCollection();
-                    values["username"] = c_encryption.encrypt(c_username);
-                    values["password"] = c_encryption.encrypt(c_password);
-                    values["hwid"] = c_encryption.encrypt(c_hwid);
-                    values["program_key"] = base64_encode(program_key);
+                    values["username"] = c_encryption.encrypt(c_username, enc_key, iv_key);
+                    values["password"] = c_encryption.encrypt(c_password, enc_key, iv_key);
+                    values["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key);
+                    values["iv_input"] = c_encryption.encrypt(iv_input, enc_key);
+                    values["program_key"] = c_encryption.base64_encode(program_key);
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "login.php", values)));
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "login.php", values)), enc_key, iv_key);
 
                     if (result == "invalid_username")
                     {
@@ -123,14 +130,14 @@ namespace c_auth
                         c_userdata.expires = c_encryption.unix_to_date(Convert.ToDouble(s[3]));
                         c_userdata.rank = Convert.ToInt32(s[4]);
 
-                        shit_pass = c_encryption.encrypt(c_password);
+                        shit_pass = c_password;
 
                         MessageBox.Show("logged in!");
                         return true;
                     }
                     else
                     {
-                        MessageBox.Show("invalid encryption key");
+                        MessageBox.Show("invalid encryption key/iv or session expired");
                         return false;
                     }
                 }
@@ -154,14 +161,15 @@ namespace c_auth
                     web.Proxy = null;
 
                     var values = new NameValueCollection();
-                    values["username"] = c_encryption.encrypt(c_username);
-                    values["email"] = c_encryption.encrypt(c_email);
-                    values["password"] = c_encryption.encrypt(c_password);
-                    values["token"] = c_encryption.encrypt(c_token);
-                    values["hwid"] = c_encryption.encrypt(c_hwid);
-                    values["program_key"] = base64_encode(program_key);
+                    values["username"] = c_encryption.encrypt(c_username, enc_key, iv_key);
+                    values["email"] = c_encryption.encrypt(c_email, enc_key, iv_key);
+                    values["password"] = c_encryption.encrypt(c_password, enc_key, iv_key);
+                    values["token"] = c_encryption.encrypt(c_token, enc_key, iv_key);
+                    values["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key);
+                    values["iv_input"] = c_encryption.encrypt(iv_input, enc_key);
+                    values["program_key"] = c_encryption.base64_encode(program_key);
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "register.php", values)));
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "register.php", values)), enc_key, iv_key);
 
                     if (result == "user_already_exists")
                     {
@@ -199,7 +207,7 @@ namespace c_auth
                     }
                     else
                     {
-                        MessageBox.Show("invalid encryption key");
+                        MessageBox.Show("invalid encryption key/iv or session expired");
                         return false;
                     }
                 }
@@ -221,12 +229,13 @@ namespace c_auth
                     web.Proxy = null;
 
                     var values = new NameValueCollection();
-                    values["username"] = c_encryption.encrypt(c_username);
-                    values["password"] = c_encryption.encrypt(c_password);
-                    values["token"] = c_encryption.encrypt(c_token);
-                    values["program_key"] = base64_encode(program_key);
+                    values["username"] = c_encryption.encrypt(c_username, enc_key, iv_key);
+                    values["password"] = c_encryption.encrypt(c_password, enc_key, iv_key);
+                    values["token"] = c_encryption.encrypt(c_token, enc_key, iv_key);
+                    values["iv_input"] = c_encryption.encrypt(iv_input, enc_key);
+                    values["program_key"] = c_encryption.base64_encode(program_key);
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "activate.php", values)));
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "activate.php", values)), enc_key, iv_key);
 
                     if (result == "invalid_username")
                     {
@@ -254,7 +263,7 @@ namespace c_auth
                     }
                     else
                     {
-                        MessageBox.Show("invalid encryption key");
+                        MessageBox.Show("invalid encryption key/iv or session expired");
                         return false;
                     }
                 }
@@ -295,13 +304,14 @@ namespace c_auth
                     web.Proxy = null;
 
                     var values = new NameValueCollection();
-                    values["var_name"] = c_encryption.encrypt(c_var_name);
-                    values["username"] = c_encryption.encrypt(c_userdata.username);
-                    values["password"] = shit_pass;
-                    values["hwid"] = c_encryption.encrypt(c_hwid);
-                    values["program_key"] = base64_encode(program_key);
+                    values["var_name"] = c_encryption.encrypt(c_var_name, enc_key, iv_key);
+                    values["username"] = c_encryption.encrypt(c_userdata.username, enc_key, iv_key);
+                    values["password"] = c_encryption.encrypt(shit_pass, enc_key, iv_key);
+                    values["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key);
+                    values["iv_input"] = c_encryption.encrypt(iv_input, enc_key);
+                    values["program_key"] = c_encryption.base64_encode(program_key);
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "var.php", values)));
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "var.php", values)), enc_key, iv_key);
 
                     return result;
                 }
@@ -323,6 +333,7 @@ namespace c_auth
     }
     class c_encryption
     {
+        public static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(_));
         public static string EncryptString(string plainText, byte[] key, byte[] iv)
         {
             Aes encryptor = Aes.Create();
@@ -393,25 +404,40 @@ namespace c_auth
             }
             return plainText;
         }
-
-        public static string encrypt(string message)
+        public static string iv_key() => Guid.NewGuid().ToString().Substring(0, Guid.NewGuid().ToString().IndexOf("-", StringComparison.Ordinal));
+        public static string encrypt(string message, string enc_key, string iv = "default_iv")
         {
             SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(c_api.enc_key));
+            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(enc_key));
 
-            byte[] iv = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
+            if (iv == "default_iv") {
+                byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
-            return EncryptString(message, key, iv);
+                return EncryptString(message, key, iv_b);
+            }
+            else {
+                byte[] iv_b = Encoding.ASCII.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.ASCII.GetBytes(iv))).Substring(0, 16));
+
+                return EncryptString(message, key, iv_b);
+            }
         }
 
-        public static string decrypt(string message)
+        public static string decrypt(string message, string enc_key, string iv = "default_iv")
         {
             SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(c_api.enc_key));
+            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(enc_key));
 
-            byte[] iv = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
+            if (iv == "default_iv") {
+                byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
-            return DecryptString(message, key, iv);
+                return DecryptString(message, key, iv_b);
+            }
+            else
+            {
+                byte[] iv_b = Encoding.ASCII.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.ASCII.GetBytes(iv))).Substring(0, 16));
+
+                return DecryptString(message, key, iv_b);
+            }
         }
 
         public static DateTime unix_to_date(double unixTimeStamp)

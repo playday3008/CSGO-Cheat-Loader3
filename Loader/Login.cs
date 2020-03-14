@@ -17,11 +17,7 @@ namespace Beta_Loader
         public Login()
         {
             InitializeComponent();
-
-            c_api.program_key = ""; // your program token/key
-            c_api.enc_key = ""; // your response encryption key
-
-            c_api.c_init("1.0"); //your program version
+            c_api.c_init("1.0", "your program key", "your response encryption key");
         }
 
         private void OpenRegister_Click(object sender, EventArgs e)
