@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections.Specialized;
 using System.Security.Principal;
 using System.Text;
 using System.IO;
 using System.Net;
-using System.Linq;
 
 namespace c_auth
 {
@@ -43,10 +40,10 @@ namespace c_auth
                     var values = new NameValueCollection();
                     values["version"] = c_encryption.encrypt(c_version, enc_key);
                     values["session_iv"] = c_encryption.encrypt(iv_key, enc_key);
-                    values["api_version"] = c_encryption.encrypt("2.0b", enc_key);
+                    values["api_version"] = c_encryption.encrypt("2.05b", enc_key);
                     values["program_key"] = c_encryption.base64_encode(program_key);
 
-                    string result = Encoding.UTF8.GetString(web.UploadValues(api_link + "init.php", values));
+                    string result = Encoding.Default.GetString(web.UploadValues(api_link + "init.php", values));
 
                     if (result == "program_doesnt_exist")
                     {
@@ -58,7 +55,7 @@ namespace c_auth
                         MessageBox.Show("wrong program version");
                         Environment.Exit(0);
                     }
-                    else if(result == c_encryption.encrypt("old_api_version", enc_key))
+                    else if (result == c_encryption.encrypt("old_api_version", enc_key))
                     {
                         MessageBox.Show("please download the newest api version on the auth's website ");
                         Environment.Exit(0);
@@ -74,6 +71,11 @@ namespace c_auth
                         Environment.Exit(0);
                     }
                 }
+            }
+            catch (CryptographicException)
+            {
+                MessageBox.Show("invalid encryption key");
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
@@ -333,7 +335,7 @@ namespace c_auth
     }
     class c_encryption
     {
-        public static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(_));
+        public static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(_));
         public static string EncryptString(string plainText, byte[] key, byte[] iv)
         {
             Aes encryptor = Aes.Create();
@@ -351,7 +353,7 @@ namespace c_auth
 
             CryptoStream cryptoStream = new CryptoStream(memoryStream, aesEncryptor, CryptoStreamMode.Write);
 
-            byte[] plainBytes = Encoding.ASCII.GetBytes(plainText);
+            byte[] plainBytes = Encoding.Default.GetBytes(plainText);
 
             cryptoStream.Write(plainBytes, 0, plainBytes.Length);
 
@@ -395,7 +397,7 @@ namespace c_auth
 
                 byte[] plainBytes = memoryStream.ToArray();
 
-                plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
+                plainText = Encoding.Default.GetString(plainBytes, 0, plainBytes.Length);
             }
             finally
             {
@@ -408,15 +410,17 @@ namespace c_auth
         public static string encrypt(string message, string enc_key, string iv = "default_iv")
         {
             SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(enc_key));
+            byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv") {
+            if (iv == "default_iv")
+            {
                 byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
                 return EncryptString(message, key, iv_b);
             }
-            else {
-                byte[] iv_b = Encoding.ASCII.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.ASCII.GetBytes(iv))).Substring(0, 16));
+            else
+            {
+                byte[] iv_b = Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16));
 
                 return EncryptString(message, key, iv_b);
             }
@@ -425,16 +429,17 @@ namespace c_auth
         public static string decrypt(string message, string enc_key, string iv = "default_iv")
         {
             SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(enc_key));
+            byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv") {
+            if (iv == "default_iv")
+            {
                 byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
                 return DecryptString(message, key, iv_b);
             }
             else
             {
-                byte[] iv_b = Encoding.ASCII.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.ASCII.GetBytes(iv))).Substring(0, 16));
+                byte[] iv_b = Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16));
 
                 return DecryptString(message, key, iv_b);
             }
@@ -457,7 +462,7 @@ namespace c_auth
             X509Certificate2 cert2 = new X509Certificate2(cert);
 
             SHA256 x = SHA256Managed.Create();
-            byte[] retUrn = x.ComputeHash(Encoding.ASCII.GetBytes(cert2.GetPublicKeyString()));
+            byte[] retUrn = x.ComputeHash(Encoding.Default.GetBytes(cert2.GetPublicKeyString()));
 
             return Convert.ToBase64String(retUrn);
         }
