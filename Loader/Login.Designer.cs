@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
 			this.llogin = new MetroFramework.Controls.MetroButton();
 			this.OpenRegister = new MetroFramework.Controls.MetroButton();
 			this.metroStyleManager1 = new MetroFramework.Components.MetroStyleManager(this.components);
@@ -169,6 +170,7 @@
 			this.Controls.Add(this.metroLabel1);
 			this.Controls.Add(this.OpenRegister);
 			this.Controls.Add(this.llogin);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "Login";
 			this.Resizable = false;
 			this.ShadowType = MetroFramework.Forms.MetroFormShadowType.SystemShadow;

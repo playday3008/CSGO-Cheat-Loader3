@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
 			this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
 			this.label2 = new MetroFramework.Controls.MetroLabel();
 			this.metroLabel2 = new MetroFramework.Controls.MetroLabel();
@@ -104,6 +105,7 @@
 			this.Controls.Add(this.metroLabel2);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.metroLabel1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "Main";
 			this.Resizable = false;
 			this.ShadowType = MetroFramework.Forms.MetroFormShadowType.SystemShadow;
