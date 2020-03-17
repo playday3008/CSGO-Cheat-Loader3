@@ -1014,7 +1014,9 @@ namespace ManualMapInjection.Injection
                 // inject
                 result = LoadImageToMemory(handle.AddrOfPinnedObject());
             }
+#pragma warning disable CS0168 // ѕеременна€ объ€влена, но не используетс€
             catch (Exception e)
+#pragma warning restore CS0168 // ѕеременна€ объ€влена, но не используетс€
             {
 #if DEBUG
                 Debug.WriteLine($"Unexpected error {e}");
