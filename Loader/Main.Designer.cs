@@ -84,6 +84,7 @@
 			// 
 			// Inject
 			// 
+			this.Inject.AutoSize = true;
 			this.Inject.FontSize = MetroFramework.MetroButtonSize.Medium;
 			this.Inject.Location = new System.Drawing.Point(98, 121);
 			this.Inject.Name = "Inject";
