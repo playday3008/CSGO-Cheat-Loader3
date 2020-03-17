@@ -54,11 +54,18 @@ namespace dll_tool
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            byte[] unencrypted = File.ReadAllBytes(textBox1.Text);
-            byte[] encrypted = AES_Encrypt(unencrypted, Encoding.UTF8.GetBytes("XSaBw6JkWFZh7PBgLQb5TndqzEkm"));
-            string path = textBox1.Text.Substring(0, textBox1.Text.Length - 4) + "_encrypted.dll";
-            File.WriteAllBytes(path, encrypted);
-            MessageBox.Show("DLL saved in: " + path);
+            try
+            {
+                byte[] unencrypted = File.ReadAllBytes(textBox1.Text);
+                byte[] encrypted = AES_Encrypt(unencrypted, Encoding.UTF8.GetBytes(textBox2.Text));
+                string path = textBox1.Text.Substring(0, textBox1.Text.Length - 4) + "_encrypted.dll";
+                File.WriteAllBytes(path, encrypted);
+                MessageBox.Show("DLL saved in:\n" + path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
