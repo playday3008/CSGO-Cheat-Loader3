@@ -5,8 +5,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Specialized;
 using System.Security.Principal;
 using System.Text;
-using System.IO;
 using System.Net;
+using System.IO;
 
 namespace c_auth
 {
@@ -37,11 +37,11 @@ namespace c_auth
                     {
                         ["version"] = c_encryption.encrypt(c_version, enc_key),
                         ["session_iv"] = c_encryption.encrypt(iv_key, enc_key),
-                        ["api_version"] = c_encryption.encrypt("2.1b", enc_key),
+                        ["api_version"] = c_encryption.encrypt("2.6b", enc_key),
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
-                    string result = Encoding.Default.GetString(web.UploadValues(api_link + "init.php", values));
+                    string result = Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=init", values));
 
                     switch (result)
                     {
@@ -98,7 +98,7 @@ namespace c_auth
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "login.php", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=login", values)), enc_key, iv_key);
 
                     switch (result)
                     {
@@ -166,7 +166,7 @@ namespace c_auth
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "register.php", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=register", values)), enc_key, iv_key);
 
                     switch (result)
                     {
@@ -229,7 +229,7 @@ namespace c_auth
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "activate.php", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=activate", values)), enc_key, iv_key);
 
                     switch (result)
                     {
@@ -304,7 +304,7 @@ namespace c_auth
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "var.php", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=var", values)), enc_key, iv_key);
 
                     return result;
                 }
@@ -316,9 +316,9 @@ namespace c_auth
                 return "";
             }
         }
-        private static string api_link = "https://firefra.me/auth/api/"; //maybe you'll make your own auth based on mine
+        private static string api_link = "https://firefra.me/auth/api/"; 
 
-        private static string user_agent = "Mozilla FireFrame"; //my ddos protection needs Mozilla in front
+        private static string user_agent = "Mozilla FireFrame";
     }
     class c_userdata
     {
