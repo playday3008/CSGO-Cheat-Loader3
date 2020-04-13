@@ -10,7 +10,7 @@ using System.IO;
 
 namespace c_auth
 {
-    class c_api
+    public class c_api
     {
         private static string program_key { get; set; }
         private static string enc_key { get; set; }
@@ -37,7 +37,7 @@ namespace c_auth
                     {
                         ["version"] = c_encryption.encrypt(c_version, enc_key),
                         ["session_iv"] = c_encryption.encrypt(iv_key, enc_key),
-                        ["api_version"] = c_encryption.encrypt("2.6b", enc_key),
+                        ["api_version"] = c_encryption.encrypt("2.7b", enc_key),
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
@@ -46,17 +46,17 @@ namespace c_auth
                     switch (result)
                     {
                         case "program_doesnt_exist":
-                            MessageBox.Show("the program doesnt exist");
+                            MessageBox.Show("The program doesnt exist", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
                         case string xd when xd.Equals(c_encryption.encrypt("wrong_version", enc_key)):
-                            MessageBox.Show("wrong program version");
+                            MessageBox.Show("Wrong program version", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
                         case string xd when xd.Equals(c_encryption.encrypt("old_api_version", enc_key)):
-                            MessageBox.Show("please download the newest api version on the auth's website ");
+                            MessageBox.Show("Please download the newest API files on the auth's website", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
@@ -69,7 +69,7 @@ namespace c_auth
             }
             catch (CryptographicException)
             {
-                MessageBox.Show("invalid encryption key");
+                MessageBox.Show("Invalid encryption key", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
             catch (Exception ex)
@@ -103,36 +103,42 @@ namespace c_auth
                     switch (result)
                     {
                         case "invalid_username":
-                            MessageBox.Show("invalid username");
+                            MessageBox.Show("Invalid username", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_password":
-                            MessageBox.Show("invalid password");
+                            MessageBox.Show("Invalid password", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
+
+                        case "user_is_banned":
+                            MessageBox.Show("The user is banned", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "no_sub":
-                            MessageBox.Show("no sub");
+                            MessageBox.Show("Your subscription is over", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_hwid":
-                            MessageBox.Show("invalid hwid");
+                            MessageBox.Show("Invalid HWID", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case string xd when xd.Contains("logged_in"):
-                            string[] s = result.Split('|'); //to do, use json
+                            string[] s = result.Split('|');
 
                             c_userdata.username = s[1];
                             c_userdata.email = s[2];
+
                             c_userdata.expires = c_encryption.unix_to_date(Convert.ToDouble(s[3]));
+
                             c_userdata.rank = Convert.ToInt32(s[4]);
 
                             shit_pass = c_encryption.encrypt(c_password, enc_key, iv_key);
 
-                            MessageBox.Show("logged in!");
+                            MessageBox.Show("Logged in!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired");
+                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
@@ -171,35 +177,35 @@ namespace c_auth
                     switch (result)
                     {
                         case "user_already_exists":
-                            MessageBox.Show("user already exists");
+                            MessageBox.Show("User already exists", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "email_already_exists":
-                            MessageBox.Show("email already exists");
+                            MessageBox.Show("Email already exists", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_email_format":
-                            MessageBox.Show("invalid email format");
+                            MessageBox.Show("Invalid email format", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_token":
-                            MessageBox.Show("invalid token");
+                            MessageBox.Show("Invalid token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "maximum_users_reached":
-                            MessageBox.Show("maximum users reached");
+                            MessageBox.Show("Maximum users of the program was reached, please contact the program owner", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "used_token":
-                            MessageBox.Show("used token");
+                            MessageBox.Show("Already used token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "success":
-                            MessageBox.Show("success");
+                            MessageBox.Show("Success!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired");
+                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
@@ -234,27 +240,31 @@ namespace c_auth
                     switch (result)
                     {
                         case "invalid_username":
-                            MessageBox.Show("invalid username");
+                            MessageBox.Show("Invalid username", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_password":
-                            MessageBox.Show("invalid password");
+                            MessageBox.Show("Invalid password", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
+
+                        case "user_is_banned":
+                            MessageBox.Show("The user is banned", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_token":
-                            MessageBox.Show("invalid token");
+                            MessageBox.Show("Invalid token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "used_token":
-                            MessageBox.Show("used token");
+                            MessageBox.Show("Already used token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "success":
-                            MessageBox.Show("success");
+                            MessageBox.Show("Success!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired");
+                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
@@ -320,14 +330,14 @@ namespace c_auth
 
         private static string user_agent = "Mozilla FireFrame";
     }
-    class c_userdata
+    public class c_userdata
     {
         public static string username { get; set; }
         public static string email { get; set; }
         public static DateTime expires { get; set; }
         public static int rank { get; set; }
     }
-    class c_encryption
+    public class c_encryption
     {
         public static string base64_encode(string _) => System.Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(_));
         public static string EncryptString(string plainText, byte[] key, byte[] iv)
@@ -411,14 +421,12 @@ namespace c_auth
             SHA256 mySHA256 = SHA256Managed.Create();
             byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv")
-            {
+            if (iv == "default_iv") {
                 byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
                 return EncryptString(message, key, iv_b);
             }
-            else
-            {
+            else {
                 byte[] iv_b = Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16));
 
                 return EncryptString(message, key, iv_b);
@@ -430,14 +438,12 @@ namespace c_auth
             SHA256 mySHA256 = SHA256Managed.Create();
             byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv")
-            {
+            if (iv == "default_iv") {
                 byte[] iv_b = new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 };
 
                 return DecryptString(message, key, iv_b);
             }
-            else
-            {
+            else {
                 byte[] iv_b = Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16));
 
                 return DecryptString(message, key, iv_b);
