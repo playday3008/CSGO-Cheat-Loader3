@@ -33,6 +33,8 @@ namespace Beta_Loader
 
             if (response)
             {
+                c_api.c_log("logged in");
+
                 new Main().Show();
                 this.Hide();
             }
