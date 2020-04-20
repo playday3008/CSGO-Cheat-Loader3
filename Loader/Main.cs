@@ -47,6 +47,7 @@ namespace Beta_Loader
                     var injector = new ManualMapInjector(target) { AsyncInjection = true }; //initializing the injector
                     Inject.Text = $"hmodule = 0x{injector.Inject(decrypted).ToInt64():x8}"; //inject the dll
                     MessageBox.Show("Success!!!");
+                    c_api.c_log("injected successfully");
                     Application.Exit();
                 }
                 catch (Exception ex)
