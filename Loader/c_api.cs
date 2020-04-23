@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Net.Security;
 
 namespace c_auth
 {
@@ -19,12 +20,11 @@ namespace c_auth
         private static string iv_input { get; set; }
         public static void c_init(string c_version, string c_program_key, string c_encryption_key) {
             try {
-                if (c_encryption.ssl_cert(api_link, user_agent) != "oek2twC+UlJnvPdW/1eZPmTnKZUvDd4VsYcyGVOo5E0=")
-                    Environment.Exit(0);
-
                 using (var web = new WebClient()) {
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
+
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
 
                     program_key = c_program_key;
                     iv_key = c_encryption.iv_key();
@@ -33,11 +33,13 @@ namespace c_auth
                     var values = new NameValueCollection {
                         ["version"] = c_encryption.encrypt(c_version, enc_key),
                         ["session_iv"] = c_encryption.encrypt(iv_key, enc_key),
-                        ["api_version"] = c_encryption.encrypt("2.8b", enc_key),
+                        ["api_version"] = c_encryption.encrypt("2.9b", enc_key),
                         ["program_key"] = c_encryption.base64_encode(program_key)
                     };
 
                     string result = Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=init", values));
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "program_doesnt_exist":
@@ -79,6 +81,8 @@ namespace c_auth
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
 
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
+
                     var values = new NameValueCollection {
                         ["username"] = c_encryption.encrypt(c_username, enc_key, iv_key),
                         ["password"] = c_encryption.encrypt(c_password, enc_key, iv_key),
@@ -88,6 +92,8 @@ namespace c_auth
                     };
 
                     string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=login", values)), enc_key, iv_key);
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "invalid_username":
@@ -145,6 +151,8 @@ namespace c_auth
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
 
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
+
                     var values = new NameValueCollection {
                         ["username"] = c_encryption.encrypt(c_username, enc_key, iv_key),
                         ["email"] = c_encryption.encrypt(c_email, enc_key, iv_key),
@@ -156,6 +164,8 @@ namespace c_auth
                     };
 
                     string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=register", values)), enc_key, iv_key);
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "user_already_exists":
@@ -204,6 +214,8 @@ namespace c_auth
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
 
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
+
                     var values = new NameValueCollection {
                         ["username"] = c_encryption.encrypt(c_username, enc_key, iv_key),
                         ["password"] = c_encryption.encrypt(c_password, enc_key, iv_key),
@@ -213,6 +225,8 @@ namespace c_auth
                     };
 
                     string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=activate", values)), enc_key, iv_key);
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "invalid_username":
@@ -274,6 +288,8 @@ namespace c_auth
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
 
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
+
                     var values = new NameValueCollection {
                         ["var_name"] = c_encryption.encrypt(c_var_name, enc_key, iv_key),
                         ["username"] = c_encryption.encrypt(c_userdata.username, enc_key, iv_key),
@@ -284,6 +300,8 @@ namespace c_auth
                     };
 
                     string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=var", values)), enc_key, iv_key);
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     return result;
                 }
@@ -302,6 +320,8 @@ namespace c_auth
                     web.Proxy = null;
                     web.Headers["User-Agent"] = user_agent;
 
+                    ServicePointManager.ServerCertificateValidationCallback = c_encryption.pin_public_key;
+
                     var values = new NameValueCollection {
                         ["username"] = c_encryption.encrypt(c_userdata.username, enc_key, iv_key),
                         ["message"] = c_encryption.encrypt(c_message, enc_key, iv_key),
@@ -310,6 +330,8 @@ namespace c_auth
                     };
 
                     string result = Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=log", values));
+
+                    ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
                 }
             }
             catch (Exception ex) {
@@ -317,7 +339,7 @@ namespace c_auth
                 Environment.Exit(0);
             }
         }
-
+        
         private static string api_link = "https://firefra.me/auth/api/";
 
         private static string user_agent = "Mozilla FireFrame";
@@ -331,7 +353,7 @@ namespace c_auth
     }
     public class c_encryption
     {
-        public static string base64_encode(string _) =>
+        public static string base64_encode(string _) => 
             System.Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(_));
 
         public static string EncryptString(string plainText, byte[] key, byte[] iv) {
@@ -404,38 +426,42 @@ namespace c_auth
             return plainText;
         }
 
-        public static string iv_key() =>
+        public static string iv_key() => 
             Guid.NewGuid().ToString().Substring(0, Guid.NewGuid().ToString().IndexOf("-", StringComparison.Ordinal));
-
+            
         public static string encrypt(string message, string enc_key, string iv = "default_iv") {
             SHA256 mySHA256 = SHA256Managed.Create();
             byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv")
-                return EncryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });
-            else
-                return EncryptString(message, key, Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16)));
+            if (iv == "default_iv") 
+                return EncryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });   
+            else 
+                return EncryptString(message, key, Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16)));     
         }
 
         public static string decrypt(string message, string enc_key, string iv = "default_iv") {
             SHA256 mySHA256 = SHA256Managed.Create();
             byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv")
-                return DecryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });
-            else
+            if (iv == "default_iv") 
+                return DecryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });         
+            else 
                 return DecryptString(message, key, Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16)));
         }
 
         public static DateTime unix_to_date(double unixTimeStamp) =>
             new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc).AddSeconds(unixTimeStamp).ToLocalTime();
 
-        public static string ssl_cert(string url, string user_agent) {
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpWebRequest.UserAgent = user_agent;
-            ((HttpWebResponse)httpWebRequest.GetResponse()).Close();
-            X509Certificate2 cert2 = new X509Certificate2(httpWebRequest.ServicePoint.Certificate);
-            return Convert.ToBase64String(SHA256.Create().ComputeHash(Encoding.Default.GetBytes(cert2.GetPublicKeyString())));
+        public static bool pin_public_key(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
+            if (null == certificate)
+                return false;
+
+            String pk = certificate.GetPublicKeyString();
+            if (pk.Equals("3082010A0282010100DC29F7332A7EE01A60373A983C69CE9CBBAA003D2AA7D022ED443239CCD2396555434405F5DC3F8ACBADC47BF3782B74C49A5063863A9E2E32CDE9AA833F81AF9BA11660921387779418D5B00B75CF323D0F52B03CBF6B525856789EFB24997A88BB02CD4BF22DCE6A7ECF03557AA53D705035518D95B022263C8BA029D594A2DB54DF3A1F67C0AC7027A2E1077FB0B877883A4763B4A49A70D256718CA1F00BB15B2EA8870646C4773E758F4DB6A7449D0846D3B6493EEF071B81A95ECB52B620D1F177366D9EC597D67D5768D7E3156BF26A80C295E2F6CEC5EC51587C0720509C3A2065466F885A584EFCA69474638D440DC168E558ECBE47305FE057D4D70203010001"))
+                return true;
+
+            // Bad dog
+            return false;
         }
     }
 }
