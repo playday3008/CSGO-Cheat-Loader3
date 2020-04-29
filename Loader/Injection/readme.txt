@@ -1,0 +1,1 @@
+idk if its working at all, i removed some stuff so it works with .net framework, as its a .net core 3 project

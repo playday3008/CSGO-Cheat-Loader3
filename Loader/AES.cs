@@ -23,7 +23,7 @@ namespace Beta_Loader
             {
                 using (RijndaelManaged AES = new RijndaelManaged())
                 {
-                    AES.KeySize = 256; //32 chars
+                    AES.KeySize = 256;
                     AES.BlockSize = 128;
 
                     var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);

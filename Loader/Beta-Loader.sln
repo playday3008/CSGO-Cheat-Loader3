@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.645
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beta-Loader", "Beta-Loader.csproj", "{1C9408DB-14E8-4130-A1C1-C60B6EDD97FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dll Encryptor", "..\Dll Encryptor\Dll Encryptor.csproj", "{1DB4FE9F-EF0F-4913-9E70-DB43D374FDB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1C9408DB-14E8-4130-A1C1-C60B6EDD97FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C9408DB-14E8-4130-A1C1-C60B6EDD97FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C9408DB-14E8-4130-A1C1-C60B6EDD97FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DB4FE9F-EF0F-4913-9E70-DB43D374FDB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DB4FE9F-EF0F-4913-9E70-DB43D374FDB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DB4FE9F-EF0F-4913-9E70-DB43D374FDB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DB4FE9F-EF0F-4913-9E70-DB43D374FDB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
