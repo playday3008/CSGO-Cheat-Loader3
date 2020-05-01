@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\Costura.Fody.4.1.0\build\Costura.Fody.props" Condition="Exists('packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" />
+  <Import Project="packages\Costura.Fody.3.3.3\build\Costura.Fody.props" Condition="Exists('packages\Costura.Fody.3.3.3\build\Costura.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -31,14 +31,14 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Release\Loader\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
+    <Reference Include="Costura, Version=3.3.3.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
+      <HintPath>packages\Costura.Fody.3.3.3\lib\net40\Costura.dll</HintPath>
     </Reference>
     <Reference Include="MetroFramework, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
       <HintPath>packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.dll</HintPath>
@@ -49,27 +49,11 @@
     <Reference Include="MetroFramework.Fonts, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
       <HintPath>packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.Fonts.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Properties\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Collections.Immutable.1.7.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reflection.Metadata, Version=1.4.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Reflection.Metadata.1.8.0\lib\netstandard2.0\System.Reflection.Metadata.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -83,59 +67,6 @@
   <ItemGroup>
     <Compile Include="AES.cs" />
     <Compile Include="c_api.cs" />
-    <Compile Include="Injection\Extensions\ProcessExtensions.cs" />
-    <Compile Include="Injection\LibraryMapper.cs" />
-    <Compile Include="Injection\Native\Constants.cs" />
-    <Compile Include="Injection\Native\Enumerations\AccessMask.cs" />
-    <Compile Include="Injection\Native\Enumerations\AllocationType.cs" />
-    <Compile Include="Injection\Native\Enumerations\BaseRelocationType.cs" />
-    <Compile Include="Injection\Native\Enumerations\DllReason.cs" />
-    <Compile Include="Injection\Native\Enumerations\FreeType.cs" />
-    <Compile Include="Injection\Native\Enumerations\NtStatus.cs" />
-    <Compile Include="Injection\Native\Enumerations\ProcessInformationClass.cs" />
-    <Compile Include="Injection\Native\Enumerations\ProtectionType.cs" />
-    <Compile Include="Injection\Native\Enumerations\SymbolOptions.cs" />
-    <Compile Include="Injection\Native\Enumerations\ThreadCreationFlags.cs" />
-    <Compile Include="Injection\Native\PInvoke\Dbghelp.cs" />
-    <Compile Include="Injection\Native\PInvoke\Kernel32.cs" />
-    <Compile Include="Injection\Native\PInvoke\Ntdll.cs" />
-    <Compile Include="Injection\Native\SafeHandle\SafeWin32Handle.cs" />
-    <Compile Include="Injection\Native\Structures\ApiSetNamespace.cs" />
-    <Compile Include="Injection\Native\Structures\ApiSetNamespaceEntry.cs" />
-    <Compile Include="Injection\Native\Structures\ApiSetValueEntry.cs" />
-    <Compile Include="Injection\Native\Structures\ImageBaseRelocation.cs" />
-    <Compile Include="Injection\Native\Structures\ImageDelayLoadDescriptor.cs" />
-    <Compile Include="Injection\Native\Structures\ImageExportDirectory.cs" />
-    <Compile Include="Injection\Native\Structures\ImageImportDescriptor.cs" />
-    <Compile Include="Injection\Native\Structures\ImageLoadConfigDirectory.cs" />
-    <Compile Include="Injection\Native\Structures\ImageTlsDirectory.cs" />
-    <Compile Include="Injection\Native\Structures\LdrDataTableEntry.cs" />
-    <Compile Include="Injection\Native\Structures\ListEntry.cs" />
-    <Compile Include="Injection\Native\Structures\Peb.cs" />
-    <Compile Include="Injection\Native\Structures\PebLdrData.cs" />
-    <Compile Include="Injection\Native\Structures\ProcessBasicInformation.cs" />
-    <Compile Include="Injection\Native\Structures\SymbolInfo.cs" />
-    <Compile Include="Injection\Native\Structures\UnicodeString.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\BaseRelocationDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\DelayImportDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\ExportDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\ImportDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\LoadConfigDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectories\TlsDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\DataDirectory.cs" />
-    <Compile Include="Injection\PortableExecutable\PeImage.cs" />
-    <Compile Include="Injection\PortableExecutable\Structures\BaseRelocation.cs" />
-    <Compile Include="Injection\PortableExecutable\Structures\ExportedFunction.cs" />
-    <Compile Include="Injection\PortableExecutable\Structures\ImportDescriptor.cs" />
-    <Compile Include="Injection\PortableExecutable\Structures\ImportedFunction.cs" />
-    <Compile Include="Injection\RemoteProcess\PebAccessor.cs" />
-    <Compile Include="Injection\RemoteProcess\ProcessManager.cs" />
-    <Compile Include="Injection\RemoteProcess\Structures\Module.cs" />
-    <Compile Include="Injection\RemoteProcess\Structures\PebData.cs" />
-    <Compile Include="Injection\RoutineCall\Assembler.cs" />
-    <Compile Include="Injection\RoutineCall\Structures\RoutineDescriptor.cs" />
-    <Compile Include="Injection\Shared\ExceptionBuilder.cs" />
-    <Compile Include="Injection\Symbol\SymbolParser.cs" />
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -148,6 +79,12 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="ManualMap\Helpers.cs" />
+    <Compile Include="ManualMap\ManualMapInjector.cs" />
+    <Compile Include="ManualMap\Types\ManagedPtr.cs" />
+    <Compile Include="ManualMap\Win32\Definitions.cs" />
+    <Compile Include="ManualMap\Win32\Imports.cs" />
+    <Compile Include="ManualMap\Win32\PDefinitions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.cs">
@@ -189,16 +126,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Injection\readme.txt" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\Fody.4.0.2\build\Fody.targets" Condition="Exists('packages\Fody.4.0.2\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>Este projeto faz referência a pacotes do NuGet que não estão presentes neste computador. Use a Restauração de Pacotes do NuGet para baixá-los.  Para obter mais informações, consulte http://go.microsoft.com/fwlink/?LinkID=322105. O arquivo ausente é {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\Fody.6.0.0\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Fody.6.0.0\build\Fody.targets'))" />
-    <Error Condition="!Exists('packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Costura.Fody.4.1.0\build\Costura.Fody.props'))" />
   </Target>
-  <Import Project="packages\Fody.6.0.0\build\Fody.targets" Condition="Exists('packages\Fody.6.0.0\build\Fody.targets')" />
 </Project>
