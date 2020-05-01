@@ -16,20 +16,13 @@ namespace Beta_Loader
 {
     public partial class Main : MetroFramework.Forms.MetroForm
     {
-        public Main()
-        {
+        public Main() =>
             InitializeComponent();
-            label2.Text = c_userdata.username;
-            label4.Text = c_userdata.expires.ToString();
-        }
 
-        private void Main_FormClosed(object sender, FormClosedEventArgs e)
-        {
+        private void Main_FormClosed(object sender, FormClosedEventArgs e) =>
             Application.Exit(); //close the app if the form is closed
-        }
 
-        private void Inject_Click(object sender, EventArgs e)
-        {
+        private void Inject_Click(object sender, EventArgs e) {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12; //bugs sometimes
 
             WebClient mac = new WebClient(); //creates a new webclient
@@ -50,22 +43,19 @@ namespace Beta_Loader
                     c_api.c_log("injected successfully");
                     Application.Exit();
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     MessageBox.Show("Exception happened : " + ex); //check some exceptions
                     Application.Exit();
                 }
             }
-            else
-            {
+            else {
                 MessageBox.Show("Please open CSGO"); //error open csgo
             }
         }
 
-        private void Main_Load(object sender, EventArgs e)
-        {
-
+        private void Main_Load(object sender, EventArgs e) {
+            label2.Text = c_userdata.username;
+            label4.Text = c_userdata.expires.ToString();
         }
-
     }
 }

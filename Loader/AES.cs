@@ -12,17 +12,13 @@ namespace Beta_Loader
 {
     class AES
     {
-        
-        public static byte[] DecryptAES(byte[] bytesToBeDecrypted, byte[] passwordBytes)
-        {
+        public static byte[] DecryptAES(byte[] bytesToBeDecrypted, byte[] passwordBytes) {
             byte[] decryptedBytes = null;
-             
+
             byte[] saltBytes = new byte[] { 1, 2, 38, 6, 4, 5, 6, 3, 4, 9, 6, 34, 4, 9, 4, 3, 3, 46, 54, 64, 5, 31, 24, 65, 1, 63, 4, 56, 46, 3, 7, 3 };
 
-            using (MemoryStream ms = new MemoryStream())
-            {
-                using (RijndaelManaged AES = new RijndaelManaged())
-                {
+            using (MemoryStream ms = new MemoryStream()) {
+                using (RijndaelManaged AES = new RijndaelManaged()) {
                     AES.KeySize = 256; //32 chars
                     AES.BlockSize = 128;
 
@@ -32,8 +28,7 @@ namespace Beta_Loader
 
                     AES.Mode = CipherMode.CBC;
 
-                    using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
-                    {
+                    using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write)) {
                         cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
                         cs.Close();
                     }
@@ -42,7 +37,6 @@ namespace Beta_Loader
 
                 }
             }
-
             return decryptedBytes;
         }
     }
