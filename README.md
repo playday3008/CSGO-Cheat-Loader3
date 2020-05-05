@@ -1,4 +1,4 @@
-# CSGO-Cheat-Loader3
- my third revamp of the same loader, this time using https://cauth.me, my personal project
+# CSGO-Cheat-Loader
+ my open source loader using https://cauth.me
 
 https://discordapp.com/invite/DCcCgFZ
