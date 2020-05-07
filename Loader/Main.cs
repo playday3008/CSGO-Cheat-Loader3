@@ -25,23 +25,23 @@ namespace Beta_Loader
         private void Inject_Click(object sender, EventArgs e) {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12; //bugs sometimes
 
-            WebClient mac = new WebClient(); //creates a new webclient
-            mac.Proxy = null; //null its proxy so wireshark/fiddler will not see the link
-
             Process target = Process.GetProcessesByName("csgo").FirstOrDefault(); // csgo process check
 
             if (target != null) // check if csgo is open
             {
                 try //try to do a function
                 {
-                    mac.Headers.Add("User-Agent", c_api.c_var("user_agent")); //add user-agent headers, should be Mozilla
-                    byte[] crypted = mac.DownloadData(c_api.c_var("download")); //download the dll and save it to bytes, should be the download link
-                    byte[] decrypted = AES.DecryptAES(crypted, Encoding.UTF8.GetBytes(c_api.c_var("crypt_pass"))); // decrypt the dll, crypt pass value = XSaBw6JkWFZh7PBgLQb5TndqzEkm
-                    var injector = new ManualMapInjector(target) { AsyncInjection = true }; //initializing the injector
-                    Inject.Text = $"hmodule = 0x{injector.Inject(decrypted).ToInt64():x8}"; //inject the dll
-                    MessageBox.Show("Success!!!");
-                    c_api.c_log("injected successfully");
-                    Application.Exit();
+                    using(WebClient mac = new WebClient()){
+                        mac.Proxy = null;
+                        mac.Headers.Add("User-Agent", c_api.c_var("user_agent")); //add user-agent headers, should be Mozilla
+                        byte[] crypted = mac.DownloadData(c_api.c_var("download")); //download the dll and save it to bytes, should be the download link
+                        byte[] decrypted = AES.DecryptAES(crypted, Encoding.UTF8.GetBytes(c_api.c_var("crypt_pass"))); // decrypt the dll, crypt pass value = XSaBw6JkWFZh7PBgLQb5TndqzEkm
+                        var injector = new ManualMapInjector(target) { AsyncInjection = true }; //initializing the injector
+                        Inject.Text = $"hmodule = 0x{injector.Inject(decrypted).ToInt64():x8}"; //inject the dll
+                        MessageBox.Show("Success!!!");
+                        c_api.c_log("injected successfully");
+                        Application.Exit();
+                    }
                 }
                 catch (Exception ex) {
                     MessageBox.Show("Exception happened : " + ex); //check some exceptions
