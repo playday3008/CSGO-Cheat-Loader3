@@ -33,27 +33,27 @@ namespace c_auth
                     var values = new NameValueCollection {
                         ["version"] = c_encryption.encrypt(c_version, enc_key),
                         ["session_iv"] = c_encryption.encrypt(iv_key, enc_key),
-                        ["api_version"] = c_encryption.encrypt("2.9b", enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["api_version"] = c_encryption.encrypt("3.0b", enc_key),
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=init", values));
+                    string result = Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=init", values));
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "program_doesnt_exist":
-                            MessageBox.Show("The program doesnt exist", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("The program doesnt exist", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
                         case string xd when xd.Equals(c_encryption.encrypt("wrong_version", enc_key)):
-                            MessageBox.Show("Wrong program version", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Wrong program version", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
                         case string xd when xd.Equals(c_encryption.encrypt("old_api_version", enc_key)):
-                            MessageBox.Show("Please download the newest API files on the auth's website", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Please download the newest API files on the auth's website", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(0);
                             break;
 
@@ -65,11 +65,11 @@ namespace c_auth
                 }
             }
             catch (CryptographicException) {
-                MessageBox.Show("Invalid encryption key", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid API/Encryption key or the session expired", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
             }
         }
@@ -88,32 +88,32 @@ namespace c_auth
                         ["password"] = c_encryption.encrypt(c_password, enc_key, iv_key),
                         ["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key),
                         ["iv_input"] = c_encryption.encrypt(iv_input, enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=login", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=login", values)), enc_key, iv_key);
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "invalid_username":
-                            MessageBox.Show("Invalid username", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid username", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_password":
-                            MessageBox.Show("Invalid password", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid password", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "user_is_banned":
-                            MessageBox.Show("The user is banned", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("The user is banned", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "no_sub":
-                            MessageBox.Show("Your subscription is over", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Your subscription is over", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_hwid":
-                            MessageBox.Show("Invalid HWID", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid HWID", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case string _sw when _sw.Contains("logged_in"):
@@ -128,17 +128,17 @@ namespace c_auth
 
                             stored_pass = c_encryption.encrypt(c_password, enc_key, iv_key);
 
-                            MessageBox.Show("Logged in!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Logged in!!", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid API/Encryption key or the session expired", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
                 return false;
             }
@@ -160,50 +160,50 @@ namespace c_auth
                         ["token"] = c_encryption.encrypt(c_token, enc_key, iv_key),
                         ["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key),
                         ["iv_input"] = c_encryption.encrypt(iv_input, enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=register", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=register", values)), enc_key, iv_key);
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "user_already_exists":
-                            MessageBox.Show("User already exists", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("User already exists", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "email_already_exists":
-                            MessageBox.Show("Email already exists", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Email already exists", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_email_format":
-                            MessageBox.Show("Invalid email format", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid email format", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_token":
-                            MessageBox.Show("Invalid token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid token", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "maximum_users_reached":
-                            MessageBox.Show("Maximum users of the program was reached, please contact the program owner", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Maximum users of the program was reached, please contact the program owner", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "used_token":
-                            MessageBox.Show("Already used token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Already used token", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "success":
-                            MessageBox.Show("Success!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Success!!", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid API/Encryption key or the session expired", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
                 return false;
             }
@@ -221,46 +221,46 @@ namespace c_auth
                         ["password"] = c_encryption.encrypt(c_password, enc_key, iv_key),
                         ["token"] = c_encryption.encrypt(c_token, enc_key, iv_key),
                         ["iv_input"] = c_encryption.encrypt(iv_input, enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=activate", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=activate", values)), enc_key, iv_key);
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
                     switch (result) {
                         case "invalid_username":
-                            MessageBox.Show("Invalid username", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid username", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_password":
-                            MessageBox.Show("Invalid password", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid password", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "user_is_banned":
-                            MessageBox.Show("The user is banned", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("The user is banned", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "invalid_token":
-                            MessageBox.Show("Invalid token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid token", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "used_token":
-                            MessageBox.Show("Already used token", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Already used token", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
 
                         case "success":
-                            MessageBox.Show("Success!!", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Success!!", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             return true;
 
                         default:
-                            MessageBox.Show("invalid encryption key/iv or session expired", "FireFrame Auth", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Invalid API/Encryption key or the session expired", "cAuth", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                     }
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
                 return false;
             }
@@ -272,7 +272,7 @@ namespace c_auth
                 return true;
 
             else if (c_register(c_token, c_token + "@email.com", c_token, c_token, c_hwid)) {
-                MessageBox.Show("success, restarting...");
+                MessageBox.Show("Success!!, Restarting...");
                 Environment.Exit(0);
                 return true;
             }
@@ -296,10 +296,10 @@ namespace c_auth
                         ["password"] = stored_pass,
                         ["hwid"] = c_encryption.encrypt(c_hwid, enc_key, iv_key),
                         ["iv_input"] = c_encryption.encrypt(iv_input, enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = c_encryption.decrypt(Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=var", values)), enc_key, iv_key);
+                    string result = c_encryption.decrypt(Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=var", values)), enc_key, iv_key);
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
 
@@ -307,7 +307,7 @@ namespace c_auth
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
                 return "";
             }
@@ -326,23 +326,23 @@ namespace c_auth
                         ["username"] = c_encryption.encrypt(c_userdata.username, enc_key, iv_key),
                         ["message"] = c_encryption.encrypt(c_message, enc_key, iv_key),
                         ["iv_input"] = c_encryption.encrypt(iv_input, enc_key),
-                        ["program_key"] = c_encryption.base64_encode(program_key)
+                        ["program_key"] = c_encryption.byte_arr_to_str(Encoding.UTF8.GetBytes(program_key))
                     };
 
-                    string result = Encoding.Default.GetString(web.UploadValues(api_link + "handler.php?type=log", values));
+                    string result = Encoding.UTF8.GetString(web.UploadValues(api_link + "handler.php?type=log", values));
 
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
                 }
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
                 Environment.Exit(0);
             }
         }
         
-        private static string api_link = "https://firefra.me/auth/api/";
+        private static string api_link = "https://cauth.me/api/";
 
-        private static string user_agent = "Mozilla FireFrame";
+        private static string user_agent = "Mozilla cAuth";
     }
     public class c_userdata
     {
@@ -353,100 +353,90 @@ namespace c_auth
     }
     public class c_encryption
     {
-        public static string base64_encode(string _) => 
-            System.Convert.ToBase64String(System.Text.Encoding.Default.GetBytes(_));
+        public static string byte_arr_to_str(byte[] ba) {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
+        }
+
+        public static byte[] str_to_byte_arr(String hex) {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0;i < NumberChars;i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
+        }
 
         public static string EncryptString(string plainText, byte[] key, byte[] iv) {
             Aes encryptor = Aes.Create();
 
             encryptor.Mode = CipherMode.CBC;
-
-            byte[] aesKey = new byte[32];
-            Array.Copy(key, 0, aesKey, 0, 32);
-            encryptor.Key = aesKey;
+            encryptor.Key = key;
             encryptor.IV = iv;
 
-            MemoryStream memoryStream = new MemoryStream();
+            using (MemoryStream memoryStream = new MemoryStream()) {
+                using (ICryptoTransform aesEncryptor = encryptor.CreateEncryptor()) {
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aesEncryptor, CryptoStreamMode.Write)) {
+                        byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
 
-            ICryptoTransform aesEncryptor = encryptor.CreateEncryptor();
+                        cryptoStream.Write(plainBytes, 0, plainBytes.Length);
 
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aesEncryptor, CryptoStreamMode.Write);
+                        cryptoStream.FlushFinalBlock();
 
-            string cipherText = string.Empty;
-            try {
-                byte[] plainBytes = Encoding.Default.GetBytes(plainText);
+                        byte[] cipherBytes = memoryStream.ToArray();
 
-                cryptoStream.Write(plainBytes, 0, plainBytes.Length);
-
-                cryptoStream.FlushFinalBlock();
-
-                byte[] cipherBytes = memoryStream.ToArray();
-
-                cipherText = Convert.ToBase64String(cipherBytes, 0, cipherBytes.Length);
+                        return byte_arr_to_str(cipherBytes);
+                    }
+                }
             }
-            finally {
-                memoryStream.Close();
-                cryptoStream.Close();
-            }
-            return cipherText;
         }
 
         public static string DecryptString(string cipherText, byte[] key, byte[] iv) {
             Aes encryptor = Aes.Create();
 
             encryptor.Mode = CipherMode.CBC;
-
-            byte[] aesKey = new byte[32];
-            Array.Copy(key, 0, aesKey, 0, 32);
-            encryptor.Key = aesKey;
+            encryptor.Key = key;
             encryptor.IV = iv;
 
-            MemoryStream memoryStream = new MemoryStream();
+            using (MemoryStream memoryStream = new MemoryStream()) {
+                using (ICryptoTransform aesDecryptor = encryptor.CreateDecryptor()) {
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write)) {
+                        byte[] cipherBytes = str_to_byte_arr(cipherText);
 
-            ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
+                        cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
 
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
+                        cryptoStream.FlushFinalBlock();
 
-            string plainText = String.Empty;
-            try {
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
+                        byte[] plainBytes = memoryStream.ToArray();
 
-                cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
-
-                cryptoStream.FlushFinalBlock();
-
-                byte[] plainBytes = memoryStream.ToArray();
-
-                plainText = Encoding.Default.GetString(plainBytes, 0, plainBytes.Length);
+                        return Encoding.UTF8.GetString(plainBytes, 0, plainBytes.Length);
+                    }
+                }
             }
-            finally {
-                memoryStream.Close();
-                cryptoStream.Close();
-            }
-            return plainText;
         }
-
         public static string iv_key() => 
             Guid.NewGuid().ToString().Substring(0, Guid.NewGuid().ToString().IndexOf("-", StringComparison.Ordinal));
-            
-        public static string encrypt(string message, string enc_key, string iv = "default_iv") {
-            SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
 
-            if (iv == "default_iv") 
-                return EncryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });   
-            else 
-                return EncryptString(message, key, Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16)));     
+        public static string sha256(string randomString) =>
+            byte_arr_to_str(new SHA256Managed().ComputeHash(Encoding.UTF8.GetBytes(randomString)));
+
+        public static string encrypt(string message, string enc_key, string iv = "default_iv") {
+            byte[] _key = Encoding.UTF8.GetBytes(sha256(enc_key).Substring(0, 32));
+
+            if (iv == "default_iv")
+                return EncryptString(message, _key, Encoding.UTF8.GetBytes("1514834626578394"));
+            else
+                return EncryptString(message, _key, Encoding.UTF8.GetBytes(sha256(iv).Substring(0, 16)));
         }
 
         public static string decrypt(string message, string enc_key, string iv = "default_iv") {
-            SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.Default.GetBytes(enc_key));
+            byte[] _key = Encoding.UTF8.GetBytes(sha256(enc_key).Substring(0, 32));
 
             if (iv == "default_iv") 
-                return DecryptString(message, key, new byte[16] { 0x1, 0x5, 0x1, 0x4, 0x8, 0x3, 0x4, 0x6, 0x2, 0x6, 0x5, 0x7, 0x8, 0x3, 0x9, 0x4 });         
+                return DecryptString(message, _key, Encoding.UTF8.GetBytes("1514834626578394"));         
             else 
-                return DecryptString(message, key, Encoding.Default.GetBytes(Convert.ToBase64String(mySHA256.ComputeHash(Encoding.Default.GetBytes(iv))).Substring(0, 16)));
+                return DecryptString(message, _key, Encoding.UTF8.GetBytes(sha256(iv).Substring(0, 16)));
         }
 
         public static DateTime unix_to_date(double unixTimeStamp) =>
@@ -457,7 +447,7 @@ namespace c_auth
                 return false;
 
             String pk = certificate.GetPublicKeyString();
-            if (pk.Equals("3082010A0282010100DC29F7332A7EE01A60373A983C69CE9CBBAA003D2AA7D022ED443239CCD2396555434405F5DC3F8ACBADC47BF3782B74C49A5063863A9E2E32CDE9AA833F81AF9BA11660921387779418D5B00B75CF323D0F52B03CBF6B525856789EFB24997A88BB02CD4BF22DCE6A7ECF03557AA53D705035518D95B022263C8BA029D594A2DB54DF3A1F67C0AC7027A2E1077FB0B877883A4763B4A49A70D256718CA1F00BB15B2EA8870646C4773E758F4DB6A7449D0846D3B6493EEF071B81A95ECB52B620D1F177366D9EC597D67D5768D7E3156BF26A80C295E2F6CEC5EC51587C0720509C3A2065466F885A584EFCA69474638D440DC168E558ECBE47305FE057D4D70203010001"))
+            if (pk.Equals("3082010A0282010100C7429D4B4591E50FE4B3ABDA72DB3F3EA578E12B9CD4E228E4EDFAC3F9681F354C913386A13E88181D1B14D91723FB50770C5DC94FCA59D4DEE4F6632041EFE76C3B6BCFF6B8F5B38AF92547D04BD08AF71087B094F5DFE8760C8CD09A3771836807588B02282BEC7C4CD73EE7C650C0A7C7F36F2FA56DA17E892B2760C4C75950EA5C90CD4EA301EC0CBC36B8372FE8515A7131CC6DF13A97D95B94C6A92AC4E5BFF217FCB20B3C01DB085229E919555D426D919E9A9F0D4C599FE7473FA7DBDE9B33279E2FC29F6CE09FA1269409E4A82175C8E0B65723DB6F856A53E3FD11363ADD63D1346790A3E4D1E454D1714ECED9815A0F85C5019C0D4DC3D58234C10203010001"))
                 return true;
 
             // Bad dog
